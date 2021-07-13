@@ -8,8 +8,7 @@ import numpy as np
 
 def get_best_tic_tac_toe_play(available_actions, q, S, round_counter):
     for i in range(len(list(q[S[round_counter]].keys()))-1, 0, -1):
-        best_action_value = np.sort(list(q[S[round_counter]].values()))[i] #trie
-
+        best_action_value = np.sort(list(q[S[round_counter]].values()))[i]
         best_action = list(q[S[round_counter]].keys())[list(q[S[round_counter]].values()).index(best_action_value)]
         if best_action in available_actions:
             return best_action
