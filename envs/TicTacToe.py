@@ -1,3 +1,5 @@
+import random
+
 from do_not_touch.contracts import SingleAgentEnv
 import numpy as np
 
@@ -44,6 +46,11 @@ class TicTacToe(SingleAgentEnv):
         elif -1 not in self.cases:
             self.game_over = True
             self.current_score = 0.0
+        elif not self.player_turn:
+            rand = random.randint(0, 8)
+            while self.cases[rand] != -1:
+                rand = random.randint(0, 8)
+            self.act_with_action_id(rand)
 
     def score(self) -> float:
         return self.current_score

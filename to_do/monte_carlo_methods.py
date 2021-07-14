@@ -47,7 +47,7 @@ def tic_tac_toe_env(pi, q):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            elif event.type == pygame.MOUSEBUTTONUP and turn == 0 and not game_finished:
+            elif event.type == pygame.MOUSEBUTTONUP and not game_finished:
                 if monte_carlo_playing:
                     s = env.state_id()
                     S.append(s)
@@ -63,18 +63,9 @@ def tic_tac_toe_env(pi, q):
                     line = int(pos[1] // (Y / 3))
 
                     env.act_with_action_id(column + line * 3)
-                turn = 1
+
                 if env.is_game_over() and not game_finished:
                     game_finished = True
-
-        if turn == 1 and not game_finished:
-            rand = random.randint(0, 8)
-            while env.cases[rand] != -1:
-                rand = random.randint(0, 8)
-            env.act_with_action_id(rand)
-            turn = 0
-            if env.is_game_over() and not game_finished:
-                game_finished = True
 
         pygame.display.update()
 
@@ -87,7 +78,7 @@ def monte_carlo_es_on_tic_tac_toe_solo() -> PolicyAndActionValueFunction:
     """
     env = TicTacToe()
     max_episodes_count = 1000
-    gamma = 0.9
+    gamma = 0.95
 
     pi = {}
     q = {}
