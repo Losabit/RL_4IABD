@@ -24,7 +24,6 @@ def tic_tac_toe_env(pi, q):
     background = pygame.image.load('assets/tictactoe/background.png')
     x = pygame.image.load('assets/tictactoe/x.png')
     o = pygame.image.load('assets/tictactoe/o.png')
-    turn = 1
     game_finished = False
 
     if pi and q:

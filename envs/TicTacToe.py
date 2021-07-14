@@ -10,8 +10,8 @@ class TicTacToe(SingleAgentEnv):
         self.agent_pos = 0
         self.game_over = False
         self.player_turn = True
-        self.ai_value = 1
-        self.player_value = 0
+        self.player_value = 1
+        self.random_player_value = 0
         self.current_score = 0.0
         self.reset()
 
@@ -34,15 +34,15 @@ class TicTacToe(SingleAgentEnv):
         if self.player_turn:
             self.cases[action_id] = self.player_value
         else:
-            self.cases[action_id] = self.ai_value
+            self.cases[action_id] = self.random_player_value
         self.player_turn = not self.player_turn
 
         if self.tictactoe_ended(self.player_value):
             self.game_over = True
-            self.current_score = -1.0
-        elif self.tictactoe_ended(self.ai_value):
-            self.game_over = True
             self.current_score = 1.0
+        elif self.tictactoe_ended(self.random_player_value):
+            self.game_over = True
+            self.current_score = -1.0
         elif -1 not in self.cases:
             self.game_over = True
             self.current_score = 0.0
