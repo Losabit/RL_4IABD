@@ -88,6 +88,14 @@ def tic_tac_toe_env(pi, q):
 
         pygame.display.update()
 
+def init_tic_tac_toe_dict() :
+    dict = {}
+    all_possible_states = 9
+    for s in range(all_possible_states):
+        dict[s] = {}
+        for a in range(all_possible_states):
+            dict[s][a] = 0
+    return dict
 
 class TicTacToe(SingleAgentEnv):
     def __init__(self):

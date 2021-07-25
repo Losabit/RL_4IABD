@@ -80,6 +80,101 @@ def algo_q_learning(env) -> PolicyAndActionValueFunction:
     return PolicyAndActionValueFunction(pi, q)
 
 
+def get_epsilon_best_action(epsilon, available_actions, Q, s):
+    available_actions_len = len(available_actions)
+    if available_actions_len == 1:
+        return available_actions[0]
+    elif available_actions_len == 0:
+        action_values = list(Q[s].values())
+        if len(action_values) > 0:
+            best_action_value = np.sort(action_values)[len(action_values)-1]
+            best_action = list(Q[s].keys())[list(Q[s].values()).index(best_action_value)]
+            return best_action
+        else:
+            return np.random.randint(8)
+
+    if np.random.uniform(0, 1) > epsilon:
+        return available_actions[np.random.randint(available_actions_len)]
+    else:
+        for i in range(len(list(Q[s].keys())) - 1, 0, -1):
+            best_action_value = np.sort(list(Q[s].values()))[i]
+            best_action = list(Q[s].keys())[list(Q[s].values()).index(best_action_value)]
+            if best_action in available_actions:
+                return best_action
+        return available_actions[np.random.randint(available_actions_len)]
+
+
+def algo_sarsa(env) -> PolicyAndActionValueFunction:
+    max_episodes_count = 10000
+    alpha = 0.85
+    gamma = 0.95
+    epsilon = 0.9
+
+    Q = {}
+    pi = {}
+
+    for ep in tqdm(range(max_episodes_count)):
+
+        env.reset()
+        S = []
+        A = []
+        R = []
+
+        s_1 = env.state_id()
+        available_actions = env.available_actions_ids()
+        if s_1 not in Q:
+            pi[s_1] = {}
+            Q[s_1] = {}
+            for a in available_actions:
+                pi[s_1][a] = 1.0 / len(available_actions)
+                Q[s_1][a] = 0.0
+        action_1 = get_epsilon_best_action(epsilon, available_actions, Q, s_1)
+
+        while not env.is_game_over():
+            S.append(s_1)
+            available_actions = env.available_actions_ids()
+
+            if s_1 not in Q:
+                pi[s_1] = {}
+                Q[s_1] = {}
+                for a in available_actions:
+                    pi[s_1][a] = 1.0 / len(available_actions)
+                    Q[s_1][a] = 0.0
+
+            A.append(action_1)
+
+            old_score = env.score()
+            env.act_with_action_id(action_1)
+            r = env.score() - old_score
+            R.append(r)
+
+            s_2 = env.state_id()
+            available_actions = env.available_actions_ids()
+
+            if s_2 not in Q:
+                Q[s_2] = {}
+                pi[s_2] = {}
+                for a in available_actions:
+                    Q[s_2][a] = 0.0
+                    pi[s_2][a] = 1.0 / len(available_actions)
+
+            action_2 = get_epsilon_best_action(epsilon, available_actions, Q, s_2)
+
+            if action_2 not in Q[s_2]:
+                Q[s_2][action_2] = 0.0
+
+            target = r + gamma * Q[s_2][action_2]
+            Q[s_1][action_1] += alpha * (target - Q[s_1][action_1])
+
+            for a_key in pi[s_1].keys():
+                max = np.argmax(Q[s_1][a_key])
+                pi[s_1][a_key] = max
+
+            s_1 = s_2
+            action_1 = action_2
+
+    return PolicyAndActionValueFunction(pi, Q)
+
 def sarsa_on_tic_tac_toe_solo() -> PolicyAndActionValueFunction:
     """
     Creates a TicTacToe Solo environment (Single player versus Uniform Random Opponent)
@@ -87,8 +182,8 @@ def sarsa_on_tic_tac_toe_solo() -> PolicyAndActionValueFunction:
     Returns the optimal epsilon-greedy Policy and its Action-Value function (Q(s,a))
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
-    # TODO
-    pass
+    env = TicTacToe()
+    return algo_sarsa(env)
 
 
 def q_learning_on_tic_tac_toe_solo() -> PolicyAndActionValueFunction:
@@ -150,11 +245,17 @@ def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
 
 
 def demo():
-    print(sarsa_on_tic_tac_toe_solo())
-    trained = q_learning_on_tic_tac_toe_solo()
-    tic_tac_toe_env(trained.pi, trained.q)
-    print(expected_sarsa_on_tic_tac_toe_solo())
+   # trained = q_learning_on_tic_tac_toe_solo()
+   # tic_tac_toe_env(trained.pi, trained.q)
 
-    print(sarsa_on_secret_env3())
-    print(q_learning_on_secret_env3())
-    print(expected_sarsa_on_secret_env3())
+    trained = sarsa_on_tic_tac_toe_solo()
+    tic_tac_toe_env(trained.pi, trained.q)
+
+    print(expected_sarsa_on_tic_tac_toe_solo())
+    # print(sarsa_on_tic_tac_toe_solo())
+    # print(q_learning_on_tic_tac_toe_solo())
+    # print(expected_sarsa_on_tic_tac_toe_solo())
+
+    # print(sarsa_on_secret_env3())
+    # print(q_learning_on_secret_env3())
+    # print(expected_sarsa_on_secret_env3())
