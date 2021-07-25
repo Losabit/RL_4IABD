@@ -3,6 +3,14 @@ import random
 from do_not_touch.contracts import SingleAgentEnv
 import numpy as np
 
+def init_tic_tac_toe_dict() :
+    dict = {}
+    all_possible_states = 9
+    for s in range(all_possible_states):
+        dict[s] = {}
+        for a in range(all_possible_states):
+            dict[s][a] = 0
+    return dict
 
 class TicTacToe(SingleAgentEnv):
     def __init__(self):
