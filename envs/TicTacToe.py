@@ -2,6 +2,7 @@ import random
 from do_not_touch.contracts import SingleAgentEnv
 import numpy as np
 import pygame
+import math
 
 
 def get_best_tic_tac_toe_play(available_actions, q, S, round_counter):
@@ -88,7 +89,8 @@ def tic_tac_toe_env(pi, q):
 
         pygame.display.update()
 
-def init_tic_tac_toe_dict() :
+
+def init_tic_tac_toe_dict():
     dict = {}
     all_possible_states = 9
     for s in range(all_possible_states):
@@ -97,10 +99,11 @@ def init_tic_tac_toe_dict() :
             dict[s][a] = 0
     return dict
 
+
 class TicTacToe(SingleAgentEnv):
     def __init__(self):
         self.cases = [-1] * 9
-        self.agent_pos = 0
+        self.game_state = 0
         self.game_over = False
         self.player_turn = True
         self.player_value = 1
@@ -109,7 +112,15 @@ class TicTacToe(SingleAgentEnv):
         self.reset()
 
     def state_id(self) -> int:
-        return self.agent_pos
+        sum = 0
+        available_actions_size = 2
+        for i in range(len(self.cases)):
+            case = self.cases[i]
+            if case == self.player_value:
+                sum += pow(available_actions_size, i)
+            elif case == self.random_player_value:
+                sum += pow(available_actions_size, len(self.cases) + i)
+        return sum
 
     def is_game_over(self) -> bool:
         return self.game_over
@@ -123,12 +134,13 @@ class TicTacToe(SingleAgentEnv):
         assert (self.cases[action_id] == -1)
         assert (not self.game_over)
 
-        self.agent_pos = action_id
         if self.player_turn:
             self.cases[action_id] = self.player_value
         else:
             self.cases[action_id] = self.random_player_value
+
         self.player_turn = not self.player_turn
+        self.game_state = self.state_id()
 
         if self.tictactoe_ended(self.player_value):
             self.game_over = True
@@ -160,7 +172,7 @@ class TicTacToe(SingleAgentEnv):
     def reset(self):
         self.game_over = False
         self.current_score = 0.0
-        self.agent_pos = 0
+        self.game_state = 0
         self.player_turn = True
         self.cases = [-1] * 9
 

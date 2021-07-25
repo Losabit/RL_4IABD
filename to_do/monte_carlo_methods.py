@@ -34,7 +34,12 @@ def algo_monte_carlo_es(env) -> PolicyAndActionValueFunction:
                     q[s][a] = 0.0
                     returns[s][a] = []
 
-            chosen_action = available_actions[np.random.randint(len(available_actions))]
+            chosen_action = np.random.choice(
+                list(pi[s].keys()),
+                1,
+                False,
+                p=list(pi[s].values())
+            )[0]
             A.append(chosen_action)
 
             old_score = env.score()
@@ -92,8 +97,12 @@ def algo_on_policy_monte_carlo(env) -> PolicyAndActionValueFunction:
                     q[s][a] = 0.0
                     returns[s][a] = []
 
-            chosen_action = available_actions[np.random.randint(len(available_actions))]
-
+            chosen_action = np.random.choice(
+                list(pi[s].keys()),
+                1,
+                False,
+                p=list(pi[s].values())
+            )[0]
             A.append(chosen_action)
             old_score = env.score()
             env.act_with_action_id(chosen_action)
@@ -157,8 +166,12 @@ def algo_off_policy_monte_carlo(env) -> PolicyAndActionValueFunction:
                     Q[s][a] = 0.0
                     C[s][a] = 0.0
 
-            chosen_action = available_actions[np.random.randint(len(available_actions))]
-
+            chosen_action = np.random.choice(
+                list(pi[s].keys()),
+                1,
+                False,
+                p=list(pi[s].values())
+            )[0]
             A.append(chosen_action)
             old_score = env.score()
             env.act_with_action_id(chosen_action)
@@ -261,9 +274,12 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 
 def demo():
-    trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
-    tic_tac_toe_env(trained.pi, trained.q)
-
+    #trained = monte_carlo_es_on_tic_tac_toe_solo()
+    #tic_tac_toe_env(trained.pi, trained.q)
+    #trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
+    #tic_tac_toe_env(trained.pi, trained.q)
+    #trained = on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo()
+    #tic_tac_toe_env(trained.pi, trained.q)
     # print(on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo())
     # print(off_policy_monte_carlo_control_on_tic_tac_toe_solo())
 

@@ -7,6 +7,6 @@ import to_do.temporal_difference_learning as temporal_difference_learning
 
 if __name__ == "__main__":
     #dynamic_programming.demo()
-    #monte_carlo_methods.demo()
-    temporal_difference_learning.demo()
+    monte_carlo_methods.demo()
+    #temporal_difference_learning.demo()
     #deep_reinforcement_learning.demo()

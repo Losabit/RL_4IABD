@@ -29,21 +29,16 @@ def algo_q_learning(env) -> PolicyAndActionValueFunction:
                     pi[s][a] = 1.0 / len(available_actions)
                     q[s][a] = 0.0
                     b[s][a] = 1.0 / len(available_actions)
-            print(list(b[s].keys()))
-            print(list(b[s].values()))
-            print(available_actions)
+
             # actions disponibles differents selon les states
             available_actions_count = len(available_actions)
             optimal_a = list(q[s].keys())[np.argmax(list(q[s].values()))]
             for a_key, q_s_a in q[s].items():
                 if a_key == optimal_a:
                     b[s][a_key] = 1 - epsilon + epsilon / available_actions_count
-                elif a_key not in available_actions:
-                    b[s][a_key] = 0
                 else:
                     b[s][a_key] = epsilon / available_actions_count
 
-            print(list(b[s].values()))
             chosen_action = np.random.choice(
                 list(b[s].keys()),
                 1,
@@ -245,13 +240,13 @@ def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
 
 
 def demo():
-   # trained = q_learning_on_tic_tac_toe_solo()
-   # tic_tac_toe_env(trained.pi, trained.q)
-
-    trained = sarsa_on_tic_tac_toe_solo()
+    trained = q_learning_on_tic_tac_toe_solo()
     tic_tac_toe_env(trained.pi, trained.q)
 
-    print(expected_sarsa_on_tic_tac_toe_solo())
+    #trained = sarsa_on_tic_tac_toe_solo()
+    #tic_tac_toe_env(trained.pi, trained.q)
+
+    #print(expected_sarsa_on_tic_tac_toe_solo())
     # print(sarsa_on_tic_tac_toe_solo())
     # print(q_learning_on_tic_tac_toe_solo())
     # print(expected_sarsa_on_tic_tac_toe_solo())
