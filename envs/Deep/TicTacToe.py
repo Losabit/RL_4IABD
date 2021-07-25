@@ -1,5 +1,5 @@
 import random
-from do_not_touch.contracts import SingleAgentEnv
+from do_not_touch.contracts import DeepSingleAgentWithDiscreteActionsEnv
 import numpy as np
 import pygame
 import math
@@ -11,7 +11,6 @@ def get_best_tic_tac_toe_play(available_actions, q, S, round_counter):
 
     if S[round_counter] not in q:
         return available_actions[np.random.randint(len(available_actions))]
-
 
     for i in range(len(list(q[S[round_counter]].keys())) - 1, 0, -1):
         best_action_value = np.sort(list(q[S[round_counter]].values()))[i]
@@ -104,7 +103,7 @@ def init_tic_tac_toe_dict():
     return dict
 
 
-class TicTacToe(SingleAgentEnv):
+class TicTacToe(DeepSingleAgentWithDiscreteActionsEnv):
     def __init__(self):
         self.cases = [-1] * 9
         self.game_state = 0
@@ -125,6 +124,15 @@ class TicTacToe(SingleAgentEnv):
             elif case == self.random_player_value:
                 sum += pow(available_actions_size, len(self.cases) + i)
         return sum
+
+    def state_description(self) -> int:
+        return self.cases
+
+    def state_description_length(self) -> int:
+        return 9
+
+    def max_actions_count(self) -> int:
+        return 9
 
     def is_game_over(self) -> bool:
         return self.game_over

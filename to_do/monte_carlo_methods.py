@@ -5,8 +5,19 @@ from envs.TicTacToe import TicTacToe, tic_tac_toe_env
 import numpy as np
 
 
+def max_dict(d):
+  # returns the argmax (key) and max (value) from a dictionary
+  max_key = None
+  max_val = float('-inf')
+  for k, v in d.items():
+    if v > max_val:
+      max_val = v
+      max_key = k
+  return max_key, max_val
+
+
 def algo_monte_carlo_es(env) -> PolicyAndActionValueFunction:
-    max_episodes_count = 1000
+    max_episodes_count = 10000
     gamma = 0.85
 
     pi = {}
@@ -33,13 +44,7 @@ def algo_monte_carlo_es(env) -> PolicyAndActionValueFunction:
                     pi[s][a] = 1.0 / len(available_actions)
                     q[s][a] = 0.0
                     returns[s][a] = []
-
-            chosen_action = np.random.choice(
-                list(pi[s].keys()),
-                1,
-                False,
-                p=list(pi[s].values())
-            )[0]
+            chosen_action = available_actions[np.random.randint(len(available_actions))]
             A.append(chosen_action)
 
             old_score = env.score()
@@ -64,8 +69,20 @@ def algo_monte_carlo_es(env) -> PolicyAndActionValueFunction:
                 returns[S[t]][A[t]].append(G)
                 q[S[t]][A[t]] = np.mean(returns[S[t]][A[t]])
 
-                for a_key in pi[S[t]].keys():
-                    pi[S[t]][a_key] = np.argmax(q[S[t]][a_key])
+                #optimal_a_t = list(q[S[t]].keys())[np.argmax(list(q[S[t]].values()))]
+                #for a in pi[s].keys():
+                max = max_dict(q[s])
+                pi[s][max[0]] = max[1]
+                # pi[S[t]][optimal_a_t] = np.argmax(q[S[t]][optimal_a_t])
+                #for a_key in pi[S[t]].keys():
+                    # pi[S[t]][a_key] = np.argmax(q[S[t]][a_key])
+                    # pi[S[t]][a_key] = np.argmax(q[S[t]][optimal_a_t])
+    for s in pi.keys():
+        probabilities = np.array(list(pi[s].values()))
+        probabilities /= probabilities.sum()
+        for i in range(len(probabilities)):
+            pi[s][i] = probabilities[i]
+
     return PolicyAndActionValueFunction(pi, q)
 
 
@@ -166,12 +183,8 @@ def algo_off_policy_monte_carlo(env) -> PolicyAndActionValueFunction:
                     Q[s][a] = 0.0
                     C[s][a] = 0.0
 
-            chosen_action = np.random.choice(
-                list(pi[s].keys()),
-                1,
-                False,
-                p=list(pi[s].values())
-            )[0]
+            chosen_action = available_actions[np.random.randint(len(available_actions))]
+
             A.append(chosen_action)
             old_score = env.score()
             env.act_with_action_id(chosen_action)
@@ -196,14 +209,22 @@ def algo_off_policy_monte_carlo(env) -> PolicyAndActionValueFunction:
                 C[s_t][a_t] += W
                 Q[s_t][a_t] += (W / (C[s_t][a_t])) * (G - Q[s_t][a_t])
 
-                for a_key in pi[s_t].keys():
-                    pi[s_t][a_key] = np.argmax(Q[s_t][a_key])
+                max = max_dict(q[s])
+                pi[s][max[0]] = max[1]
+                # for a_key in pi[s_t].keys():
+                #    pi[s_t][a_key] = np.argmax(Q[s_t][a_key])
 
                 optimal_a_t = list(Q[s_t].keys())[np.argmax(list(Q[s_t].values()))]
                 if chosen_action != optimal_a_t:
                     break
 
                 W *= 1. / (available_actions[np.random.randint(len(available_actions))] + 1)
+
+    for s in pi.keys():
+        probabilities = np.array(list(pi[s].values()))
+        probabilities /= probabilities.sum()
+        for i in range(len(probabilities)):
+            pi[s][i] = probabilities[i]
 
     return PolicyAndActionValueFunction(pi, Q)
 
@@ -274,8 +295,9 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 
 def demo():
-    #trained = monte_carlo_es_on_tic_tac_toe_solo()
-    #tic_tac_toe_env(trained.pi, trained.q)
+    trained = monte_carlo_es_on_tic_tac_toe_solo()
+    tic_tac_toe_env(trained.pi, trained.q)
+
     #trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
     #tic_tac_toe_env(trained.pi, trained.q)
     #trained = on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo()
