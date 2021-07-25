@@ -2,22 +2,17 @@ import random
 from do_not_touch.contracts import DeepSingleAgentWithDiscreteActionsEnv
 import numpy as np
 import pygame
-import math
+import tensorflow as tf
 
 
-def get_best_tic_tac_toe_play(available_actions, q, S, round_counter):
-    if len(available_actions) == 1:
-        return available_actions[0]
+def get_best_tic_tac_toe_play(available_actions, q, cases):
+    all_q_inputs = np.zeros((len(available_actions), 9 + 9))
+    for i, a in enumerate(available_actions):
+        all_q_inputs[i] = np.hstack([cases, tf.keras.utils.to_categorical(a, 9)])
 
-    if S[round_counter] not in q:
-        return available_actions[np.random.randint(len(available_actions))]
-
-    for i in range(len(list(q[S[round_counter]].keys())) - 1, 0, -1):
-        best_action_value = np.sort(list(q[S[round_counter]].values()))[i]
-        best_action = list(q[S[round_counter]].keys())[list(q[S[round_counter]].values()).index(best_action_value)]
-        if best_action in available_actions:
-            return best_action
-
+    all_q_values = np.squeeze(q.predict(all_q_inputs))
+    chosen_action = available_actions[np.argmax(all_q_values)]
+    return chosen_action
 
 def tic_tac_toe_env(pi, q):
     env = TicTacToe()
@@ -66,7 +61,7 @@ def tic_tac_toe_env(pi, q):
             S.append(s)
             available_actions = env.available_actions_ids()
 
-            best_action = get_best_tic_tac_toe_play(available_actions, q, S, round_counter)
+            best_action = get_best_tic_tac_toe_play(available_actions, q, env.cases)
 
             env.act_with_action_id(best_action)
             round_counter = round_counter + 1
