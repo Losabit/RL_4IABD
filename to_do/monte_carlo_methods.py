@@ -274,6 +274,7 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 
 def demo():
+    pass
     #trained = monte_carlo_es_on_tic_tac_toe_solo()
     #tic_tac_toe_env(trained.pi, trained.q)
     #trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
