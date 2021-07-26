@@ -93,11 +93,11 @@ def get_best_pac_man_play(available_actions, q, cases):
     chosen_action = available_actions[np.argmax(all_q_values)]
     return chosen_action
 
+
 def pac_man_env(pi, q):
     env = PacMan()
     X = 600
     Y = 600
-    pygame.init()
     screen = pygame.display.set_mode((X, Y))
     pygame.display.set_caption('Pacman')
     background = pygame.image.load('assets/pacman/background.png')
@@ -105,13 +105,16 @@ def pac_man_env(pi, q):
     dot = pygame.image.load('assets/pacman/dot.png')
     dot = pygame.transform.scale(dot, (40, 40))
     pacman = pygame.image.load('assets/pacman/pacman_left.png')
-    inky = pygame.image.load('assets/pacman/ghosts/inky.png')
-    clyde = pygame.image.load('assets/pacman/ghosts/clyde.png')
-    pinky = pygame.image.load('assets/pacman/ghosts/pinky.png')
-    blinky = pygame.image.load('assets/pacman/ghosts/blinky.png')
+    ghost_colors = [
+        pygame.image.load('assets/pacman/ghosts/inky.png'),
+        pygame.image.load('assets/pacman/ghosts/clyde.png'),
+        pygame.image.load('assets/pacman/ghosts/pinky.png'),
+        pygame.image.load('assets/pacman/ghosts/blinky.png')
+    ]
     blue_ghost = pygame.image.load('assets/pacman/ghosts/blue_ghost.png')
     energizer = pygame.image.load('assets/pacman/energizer.png')
 
+    algo_playing = False
     if pi and q:
         algo_playing = True
 
@@ -126,34 +129,24 @@ def pac_man_env(pi, q):
                     screen.blit(dot, (15 + 21.3 * j, 10 + 19.3 * i))
                 elif line[j] == 2:
                     screen.blit(energizer, (27 + 21.3 * j, 20 + 19.3 * i))
-                elif line[j] == 3:
-                    screen.blit(pacman, (25 + 21.3 * j, 20 + 19.3 * i))
-                elif line[j] >= 4:
-                    if env.take_energizer:
-                        screen.blit(blue_ghost, (25 + 21.3 * j, 20 + 19.3 * i))
-                    else:
-                        if line[j] == 4:
-                            screen.blit(blinky, (25 + 21.3 * j, 20 + 19.3 * i))
-                        elif line[j] == 5:
-                            screen.blit(clyde, (25 + 21.3 * j, 20 + 19.3 * i))
-                        elif line[j] == 6:
-                            screen.blit(inky, (25 + 21.3 * j, 20 + 19.3 * i))
-                        elif line[j] == 7:
-                            screen.blit(pinky, (25 + 21.3 * j, 20 + 19.3 * i))
 
-        if env.take_energizer and env.energizer_time.can_execute():
-            env.take_energizer = False
+        for i in range(3):
+            if not env.ghosts[i]['dead']:
+                if env.take_energizer:
+                    screen.blit(blue_ghost, (25 + 21.3 * env.ghosts[i]['x'], 20 + 19.3 * env.ghosts[i]['y']))
+                else:
+                    screen.blit(ghost_colors[i], (25 + 21.3 * env.ghosts[i]['x'], 20 + 19.3 * env.ghosts[i]['y']))
+
+        screen.blit(pacman, (25 + 21.3 * env.pacman_position['x'], 20 + 19.3 * env.pacman_position['y']))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
             if algo_playing:
-
                 if env.move_time.can_execute():
                     chosen_action = get_best_pac_man_play(env.available_actions_ids(), q, env.cases)
                     env.act_with_action_id(chosen_action)
-
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     action = 0
@@ -172,14 +165,22 @@ def pac_man_env(pi, q):
 
 class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
     def __init__(self):
+        pygame.init()
         self.cases = initiate_map()
         self.game_state = 0
         self.game_over = False
         self.current_score = 0.0
+        self.round_counter = 0
         self.move_time = TimeCapsule(0.3)
         self.pacman_position = {'x': 13, 'y': 22}
+        self.ghost_spawn_position = [
+            [13, 10],
+            [8, 14],
+            [17, 14],
+            [17, 10]
+        ]
         self.ghosts = [
-            {'x': 13, 'y': 10, 'dead': False, 'time_to_respawn': TimeCapsule(3)} for i in range(4)
+            {'x': self.ghost_spawn_position[i][0], 'y': self.ghost_spawn_position[i][1], 'dead': False, 'time_to_respawn': TimeCapsule(3)} for i in range(4)
         ]
         self.take_energizer = False
         self.energizer_time = TimeCapsule(5.0)
@@ -194,18 +195,22 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
                 if case == 1:  # dot
                     sum += pow(available_actions_size, i)
                 elif case == 2:  # mega dot
-                    sum += pow(available_actions_size, len(self.cases) + i)
+                    sum += pow(available_actions_size, 10 + i)
                 elif case == 3:  # player position ?
-                    sum += pow(available_actions_size, len(self.cases) * 2 + i)
+                    sum += pow(available_actions_size, 10 * 2 + i)
                 elif case >= 4:  # enemy position ?
-                    sum += pow(available_actions_size, len(self.cases) * 4 + i)
+                    sum += pow(available_actions_size, 10 * 4 + i)
         return sum
 
-    def state_description(self) -> int:
-        return np.hstack(self.cases)
+    def state_description(self) -> np.ndarray:
+        cases_copy = np.array(self.cases)
+        for i in range(3):
+            cases_copy[self.ghosts[i]['y'], self.ghosts[i]['x']] = i
+        cases_copy[self.pacman_position['y']][self.pacman_position['x']] = 3
+        return np.hstack(cases_copy)
 
     def state_description_length(self) -> int:
-        return 29*26
+        return 29 * 26
 
     def max_actions_count(self) -> int:
         return 4
@@ -217,9 +222,11 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
         assert (3 >= action_id >= 0)
         assert (not self.game_over)
 
+        if self.take_energizer and self.energizer_time.can_execute():
+            self.take_energizer = False
+
         x = self.pacman_position['x']
         y = self.pacman_position['y']
-        prev_x, prev_y = x, y
 
         if action_id == 0:
             x -= 1
@@ -235,24 +242,42 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
                 self.pacman_position['x'] = x
                 self.pacman_position['y'] = y
 
-                # Update cases with player position
-                self.cases[prev_y][prev_x] = 0
-                self.cases[y][x] = 3
+                case_value = self.cases[y][x]
+                if case_value == 1:
+                    self.current_score += 100
+                    self.cases[y][x] = 0
+                elif case_value == 2:
+                    self.cases[y][x] = 0
+                    self.take_energizer = True
+                    self.energizer_time.restart()
 
-        self.move_ghosts()
+        if self.check_game_ended():
+            self.current_score += 10000
+            self.game_over = True
+        else:
+            self.move_ghosts()
 
-        case_value = self.cases[self.pacman_position['y']][self.pacman_position['x']]
-        if case_value == 1:
-            self.cases[self.pacman_position['y']][self.pacman_position['x']] = 0
-            self.current_score += 100
-        elif case_value == 2:
-            self.cases[self.pacman_position['y']][self.pacman_position['x']] = 0
-            self.take_energizer = True
-            self.energizer_time.restart()
-
+        self.current_score -= 1
+        self.round_counter += 1
         self.game_state = self.state_id()
 
+    def check_game_ended(self):
+        dot_counter = 0
+        for i in range(len(self.cases)):
+            for j in range(len(self.cases[i])):
+                if self.cases[i][j] == 1:
+                    dot_counter += 1
+
+        if self.round_counter % 10 == 0:
+            print(f"Dots left : {dot_counter}")
+            print(f"Score : {self.current_score}")
+        return dot_counter == 0
+
     def move_ghosts(self):
+
+        if self.game_over:
+            return
+
         for i in range(4):
 
             if self.ghosts[i]['dead']:
@@ -260,13 +285,14 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
                     self.ghosts[i]['dead'] = False
                     self.ghosts[i]['x'] = 13
                     self.ghosts[i]['y'] = 10
-                    self.cases[10, 13] = i
                 continue
 
-            random_action = np.random.randint(1, 4)
+            ghost_available_action = self.get_available_actions(i)
+            random_action = ghost_available_action[np.random.randint(len(ghost_available_action))]
+
             new_x = self.ghosts[i]['x']
             new_y = self.ghosts[i]['y']
-            prev_x, prev_y = new_x, new_y
+
             if random_action == 1:
                 new_x -= 1
             elif random_action == 2:
@@ -277,41 +303,61 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
                 new_y += 1
 
             if 0 <= new_x < 26 and 0 <= new_y < 29:
-                if self.cases[new_y][new_x] != -1:
+                if self.pacman_position['x'] == new_x and self.pacman_position['y'] == new_y:
+                    if self.take_energizer:
+                        self.current_score += 10000
+                        self.ghosts[i] = {'x': 13, 'y': 4, 'dead': True, 'time_to_respawn': TimeCapsule(3)}
+                    else:
+                        self.current_score -= 100000
+                        self.game_over = True
+                        return
+                elif self.cases[new_y][new_x] != -1:
                     self.ghosts[i]['x'] = new_x
                     self.ghosts[i]['y'] = new_y
-
-                    #Update case value with ghosts
-                    self.cases[new_y][new_x] = i
-                    self.cases[prev_y][prev_x] = 0
-
-                elif self.cases[new_y][new_x] == 3:
-                    if self.take_energizer:
-                        self.current_score += 1000
-                        prev_x, prev_y = self.ghosts[i]['x'], self.ghosts[i]['y']
-                        self.ghosts[i] = {'x': 13, 'y': 4, 'dead': True, 'time_to_respawn': TimeCapsule(3)}
-                        self.cases[13][4] = i
-                        self.cases[prev_x, prev_y] = 3
-                    else:
-                        self.current_score -= 10000
-                        self.game_over = True
 
     def score(self) -> float:
         return self.current_score
 
-    def available_actions_ids(self) -> np.ndarray:
+    def get_available_actions(self, ghost_id):
         if self.game_over:
             return np.array([], dtype=np.int)
-        return np.array([0, 1, 2, 3], dtype=np.int)
+
+        available_actions = []
+        if ghost_id is not None:
+            pos_x, pos_y = self.ghosts[ghost_id]['x'], self.ghosts[ghost_id]['y']
+        else:
+            pos_x, pos_y = self.pacman_position['x'], self.pacman_position['y']
+
+        if 0 <= (pos_x - 1) < 26 and self.cases[pos_y][pos_x - 1] != -1:
+            available_actions.append(0)
+        if 0 <= (pos_x + 1) < 26 and self.cases[pos_y][pos_x + 1] != -1:
+            available_actions.append(1)
+        if 0 <= pos_y - 1 < 29 and self.cases[pos_y - 1][pos_x] != -1:
+            available_actions.append(2)
+        if 0 <= pos_y + 1 < 29 and self.cases[pos_y + 1][pos_x] != -1:
+            available_actions.append(3)
+
+        return np.array(available_actions, dtype=np.int)
+
+    def available_actions_ids(self) -> np.ndarray:
+        return self.get_available_actions(None)
 
     def reset(self):
+        pygame.init()
         self.cases = initiate_map()
         self.game_state = 0
         self.game_over = False
         self.current_score = 0.0
         self.move_time = TimeCapsule(0.3)
         self.pacman_position = {'x': 13, 'y': 22}
+        self.ghost_spawn_position = [
+            [13, 10],
+            [8, 14],
+            [17, 14],
+            [17, 10]
+        ]
         self.ghosts = [
-            {'x': 13, 'y': 10, 'dead': False, 'time_to_respawn': TimeCapsule(3)} for i in range(4)
+            {'x': self.ghost_spawn_position[i][0], 'y': self.ghost_spawn_position[i][1], 'dead': False,
+             'time_to_respawn': TimeCapsule(3)} for i in range(4)
         ]
         self.take_energizer = False

@@ -1,7 +1,6 @@
 import os
 
 from envs.Deep.PacMan import PacMan, pac_man_env
-#os.add_dll_directory("D:\\Program Files (x86)\\Nvidia\\bin")
 
 import tqdm
 from do_not_touch.contracts import DeepSingleAgentWithDiscreteActionsEnv
@@ -14,8 +13,8 @@ import numpy as np
 def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
     epsilon = 0.1
     gamma = 0.9
-    max_episodes_count = 100
-    pre_warm = max_episodes_count / 10
+    max_episodes_count = 100 if not isinstance(env, PacMan) else 10
+    pre_warm = (max_episodes_count / 10) if not isinstance(env, PacMan) else 3
 
     state_description_length = env.state_description_length()
     max_actions_count = env.max_actions_count()
@@ -30,12 +29,14 @@ def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
 
     for episode_id in tqdm.tqdm(range(max_episodes_count)):
         env.reset()
+        round_counter = 0
 
         while not env.is_game_over():
+            round_counter += 1
             s = env.state_description()
             available_actions = env.available_actions_ids()
 
-            if episode_id < pre_warm or np.random.uniform(0.0, 1.0) < epsilon:
+            if (episode_id < pre_warm) or np.random.uniform(0.0, 1.0) < epsilon:
                 chosen_action = np.random.choice(available_actions)
             else:
                 all_q_inputs = np.zeros((len(available_actions), state_description_length + max_actions_count))
