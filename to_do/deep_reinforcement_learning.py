@@ -1,6 +1,7 @@
 import os
 
-os.add_dll_directory("D:\\Program Files (x86)\\Nvidia\\bin")
+from envs.Deep.PacMan import PacMan, pac_man_env
+#os.add_dll_directory("D:\\Program Files (x86)\\Nvidia\\bin")
 
 import tqdm
 from do_not_touch.contracts import DeepSingleAgentWithDiscreteActionsEnv
@@ -81,7 +82,7 @@ def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
 
 
 def demo():
-    env = TicTacToe()
-    Q = episodic_semi_gradient_sarsa(env)
-    print(Q)
-    tic_tac_toe_env(1, Q)
+    env = PacMan()
+    q = episodic_semi_gradient_sarsa(env)
+    print(q)
+    pac_man_env(1, q)
