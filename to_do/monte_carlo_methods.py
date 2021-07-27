@@ -30,7 +30,7 @@ def algo_monte_carlo_es(env) -> PolicyAndActionValueFunction:
         A = []
         R = []
 
-        G = 0
+
         while not env.is_game_over():
             s = env.state_id()
             S.append(s)
@@ -52,6 +52,7 @@ def algo_monte_carlo_es(env) -> PolicyAndActionValueFunction:
             r = env.score() - old_score
             R.append(r)
 
+            G = 0
             for t in reversed(range(len(S))):
                 G = gamma * G + R[t]
 
@@ -68,20 +69,22 @@ def algo_monte_carlo_es(env) -> PolicyAndActionValueFunction:
 
                 returns[S[t]][A[t]].append(G)
                 q[S[t]][A[t]] = np.mean(returns[S[t]][A[t]])
+                pi[S[t]] = list(q[S[t]].keys())[np.argmax(list(q[S[t]].values()))]
+
+                #max = max_dict(q[s])
+                #pi[s][max[0]] = max[1]
 
                 #optimal_a_t = list(q[S[t]].keys())[np.argmax(list(q[S[t]].values()))]
-                #for a in pi[s].keys():
-                max = max_dict(q[s])
-                pi[s][max[0]] = max[1]
                 # pi[S[t]][optimal_a_t] = np.argmax(q[S[t]][optimal_a_t])
                 #for a_key in pi[S[t]].keys():
                     # pi[S[t]][a_key] = np.argmax(q[S[t]][a_key])
                     # pi[S[t]][a_key] = np.argmax(q[S[t]][optimal_a_t])
-    for s in pi.keys():
-        probabilities = np.array(list(pi[s].values()))
-        probabilities /= probabilities.sum()
-        for i in range(len(probabilities)):
-            pi[s][i] = probabilities[i]
+
+    #for s in pi.keys():
+    #    probabilities = np.array(list(pi[s].values()))
+    #    probabilities /= probabilities.sum()
+    #    for i in range(len(probabilities)):
+    #        pi[s][i] = probabilities[i]
 
     return PolicyAndActionValueFunction(pi, q)
 
@@ -296,6 +299,7 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 def demo():
     trained = monte_carlo_es_on_tic_tac_toe_solo()
+    print(trained.pi)
     tic_tac_toe_env(trained.pi, trained.q)
 
     #trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
