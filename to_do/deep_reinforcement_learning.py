@@ -4,9 +4,9 @@ from envs.Deep.PacMan import PacMan, pac_man_env
 
 import tqdm
 from do_not_touch.contracts import DeepSingleAgentWithDiscreteActionsEnv
-from envs.Deep.TicTacToe import TicTacToe, tic_tac_toe_env
 
 import tensorflow as tf
+from numba import jit
 import numpy as np
 
 
@@ -84,6 +84,7 @@ def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
 
 def demo():
     env = PacMan()
-    q = episodic_semi_gradient_sarsa(env)
+    episodic_semi_gradient_sarsa_jit = jit()(episodic_semi_gradient_sarsa)
+    q = episodic_semi_gradient_sarsa_jit(env)
     print(q)
     pac_man_env(1, q)

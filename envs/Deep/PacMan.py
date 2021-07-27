@@ -143,11 +143,11 @@ def pac_man_env(pi, q):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            if algo_playing:
+            if algo_playing and not env.game_over:
                 if env.move_time.can_execute():
                     chosen_action = get_best_pac_man_play(env.available_actions_ids(), q, env.cases)
                     env.act_with_action_id(chosen_action)
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN and not env.game_over:
                 if event.key == pygame.K_LEFT:
                     action = 0
                 elif event.key == pygame.K_RIGHT:
@@ -157,8 +157,11 @@ def pac_man_env(pi, q):
                 elif event.key == pygame.K_DOWN:
                     action = 3
 
-            if env.move_time.can_execute() and action >= 0:
-                env.act_with_action_id(action)
+                if env.move_time.can_execute() and action >= 0:
+                    env.act_with_action_id(action)
+
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and env.game_over:  # restart game
+                env.reset()
 
         pygame.display.update()
 
@@ -188,26 +191,32 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
 
     def state_id(self) -> int:
         sum = 0
-        available_actions_size = 2
-        for i in range(len(self.cases)):
-            for j in range(len(self.cases[i])):
-                case = self.cases[i][j]
-                if case == 1:  # dot
-                    sum += pow(available_actions_size, i)
+        complete_cases = self.get_complete_cases()
+        for i in range(len(complete_cases)):
+            for j in range(len(complete_cases[i])):
+                case = complete_cases[i][j]
+                if case == 0:  # empty space
+                    sum += i
+                elif case == 1:  # dot
+                    sum += pow(2, i)
                 elif case == 2:  # mega dot
-                    sum += pow(available_actions_size, 10 + i)
+                    sum += pow(2, 10 + i)
                 elif case == 3:  # player position ?
-                    sum += pow(available_actions_size, 10 * 2 + i)
+                    sum += pow(2, 10 * 2 + i)
                 elif case >= 4:  # enemy position ?
-                    sum += pow(available_actions_size, 10 * 4 + i)
+                    sum += pow(2, 10 * 4 + i)
         return sum
 
     def state_description(self) -> np.ndarray:
+        complete_cases = self.get_complete_cases()
+        return np.hstack(complete_cases)
+
+    def get_complete_cases(self):
         cases_copy = np.array(self.cases)
-        for i in range(3):
-            cases_copy[self.ghosts[i]['y'], self.ghosts[i]['x']] = i
+        for i in range(4):
+            cases_copy[self.ghosts[i]['y'], self.ghosts[i]['x']] = i + 4
         cases_copy[self.pacman_position['y']][self.pacman_position['x']] = 3
-        return np.hstack(cases_copy)
+        return cases_copy
 
     def state_description_length(self) -> int:
         return 29 * 26
@@ -293,13 +302,13 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
             new_x = self.ghosts[i]['x']
             new_y = self.ghosts[i]['y']
 
-            if random_action == 1:
+            if random_action == 0:
                 new_x -= 1
-            elif random_action == 2:
+            elif random_action == 1:
                 new_x += 1
-            elif random_action == 3:
+            elif random_action == 2:
                 new_y -= 1
-            elif random_action == 4:
+            elif random_action == 3:
                 new_y += 1
 
             if 0 <= new_x < 26 and 0 <= new_y < 29:
@@ -312,8 +321,16 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
                         self.game_over = True
                         return
                 elif self.cases[new_y][new_x] != -1:
-                    self.ghosts[i]['x'] = new_x
-                    self.ghosts[i]['y'] = new_y
+                    can_swap_places = True
+                    for j in range(4):
+                        if i != j:
+                            can_swap_places = self.ghosts[j]['x'] != new_x or self.ghosts[j]['y'] != new_y
+                            if not can_swap_places:
+                                continue
+
+                    if can_swap_places:
+                        self.ghosts[i]['x'] = new_x
+                        self.ghosts[i]['y'] = new_y
 
     def score(self) -> float:
         return self.current_score
