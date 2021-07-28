@@ -298,18 +298,11 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 
 def demo():
-<<<<<<< HEAD
-    trained = monte_carlo_es_on_tic_tac_toe_solo()
-    # print(trained.pi)
-    tic_tac_toe_env(trained.pi, trained.q)
-
-    # trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
-    # tic_tac_toe_env(trained.pi, trained.q)
-    # trained = on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo()
-    # tic_tac_toe_env(trained.pi, trained.q)
-    # print(on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo())
-    # print(off_policy_monte_carlo_control_on_tic_tac_toe_solo())
-=======
+    """
+    print(monte_carlo_es_on_secret_env2())
+    print(on_policy_first_visit_monte_carlo_control_on_secret_env2())
+    print(off_policy_monte_carlo_control_on_secret_env2())
+    """
     choice = 0
     print("Choisissez un mode de jeu pour TicTacToe :")
     print("1. Joueur vs Random")
@@ -349,8 +342,3 @@ def demo():
             tic_tac_toe_env(trained.pi, trained.q, number_of_games)
 
 
->>>>>>> ef473db7977e1ef6f92f9bcb14af7ff3a069c7ad
-
-    # print(monte_carlo_es_on_secret_env2())
-    # print(on_policy_first_visit_monte_carlo_control_on_secret_env2())
-    # print(off_policy_monte_carlo_control_on_secret_env2())

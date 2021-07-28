@@ -293,8 +293,7 @@ def sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
     env = Env3()
-    # TODO
-    pass
+    return algo_sarsa(env)
 
 
 def q_learning_on_secret_env3() -> PolicyAndActionValueFunction:
@@ -305,8 +304,7 @@ def q_learning_on_secret_env3() -> PolicyAndActionValueFunction:
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
     env = Env3()
-    # TODO
-    pass
+    return algo_q_learning(env)
 
 
 def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
@@ -317,21 +315,16 @@ def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
     Experiment with different values of hyper parameters and choose the most appropriate combination
     """
     env = Env3()
-    # TODO
-    pass
+    return algo_expected_sarsa(env)
 
 
 def demo():
-<<<<<<< HEAD
-    # trained = q_learning_on_tic_tac_toe_solo()
-    # tic_tac_toe_env(trained.pi, trained.q)
+    print(sarsa_on_secret_env3())
+    print("\n")
+    print(q_learning_on_secret_env3())
+    print("\n")
+    print(expected_sarsa_on_secret_env3())
 
-    # trained = sarsa_on_tic_tac_toe_solo()
-    # tic_tac_toe_env(trained.pi, trained.q)
-    #
-    # trained = expected_sarsa_on_tic_tac_toe_solo()
-    # tic_tac_toe_env(trained.pi, trained.q)
-=======
     choice = 0
     print("Choisissez un mode de jeu pour TicTacToe :")
     print("1. Joueur vs Random")
@@ -369,15 +362,5 @@ def demo():
         elif algo_choice == 3:
             trained = expected_sarsa_on_tic_tac_toe_solo()
             tic_tac_toe_env(trained.pi, trained.q, number_of_games)
->>>>>>> ef473db7977e1ef6f92f9bcb14af7ff3a069c7ad
 
-    #print(expected_sarsa_on_tic_tac_toe_solo())
-    # print(sarsa_on_tic_tac_toe_solo())
-    # print(q_learning_on_tic_tac_toe_solo())
-    # print(expected_sarsa_on_tic_tac_toe_solo())
 
-    print(sarsa_on_secret_env3())
-    print("\n")
-    print(q_learning_on_secret_env3())
-    print("\n")
-    print(expected_sarsa_on_secret_env3())
