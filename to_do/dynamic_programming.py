@@ -417,14 +417,31 @@ def value_iteration_on_secret_env1() -> PolicyAndValueFunction:
 
 
 def demo():
+    print("policy_evaluation_on_line_world : ")
     print(policy_evaluation_on_line_world())
+    print()
+    print("policy_iteration_on_line_world : ")
     print(policy_iteration_on_line_world())
+    print()
+    print("value_iteration_on_line_world : ")
     print(value_iteration_on_line_world())
+    print()
 
+    print("policy_evaluation_on_grid_world : ")
     print(policy_evaluation_on_grid_world())
+    print()
+    print("policy_iteration_on_grid_world : ")
     print(policy_iteration_on_grid_world())
+    print()
+    print("value_iteration_on_grid_world : ")
     print(value_iteration_on_grid_world())
+    print()
 
+    print("policy_evaluation_on_secret_env1 : ")
     print(policy_evaluation_on_secret_env1())
+    print()
+    print("policy_iteration_on_secret_env1 : ")
     print(policy_iteration_on_secret_env1())
+    print()
+    print("value_iteration_on_secret_env1 : ")
     print(value_iteration_on_secret_env1())

@@ -85,12 +85,14 @@ def initiate_map():
 
 
 def get_best_pac_man_play(available_actions, q, cases):
-    all_q_inputs = np.zeros((len(available_actions), 9 + 9))
+    all_q_inputs = np.zeros((len(available_actions), len(cases) + 4)) # 9 + 9
     for i, a in enumerate(available_actions):
-        all_q_inputs[i] = np.hstack([cases, tf.keras.utils.to_categorical(a, 9)])
+        all_q_inputs[i] = np.hstack([cases, tf.keras.utils.to_categorical(a, 4)]) # 9
 
     all_q_values = np.squeeze(q.predict(all_q_inputs))
+    #print(all_q_values)
     chosen_action = available_actions[np.argmax(all_q_values)]
+    #print(available_actions)
     return chosen_action
 
 
@@ -130,7 +132,7 @@ def pac_man_env(pi, q):
                 elif line[j] == 2:
                     screen.blit(energizer, (27 + 21.3 * j, 20 + 19.3 * i))
 
-        for i in range(3):
+        for i in range(4):
             if not env.ghosts[i]['dead']:
                 if env.take_energizer:
                     screen.blit(blue_ghost, (25 + 21.3 * env.ghosts[i]['x'], 20 + 19.3 * env.ghosts[i]['y']))
@@ -143,10 +145,6 @@ def pac_man_env(pi, q):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            if algo_playing and not env.game_over:
-                if env.move_time.can_execute():
-                    chosen_action = get_best_pac_man_play(env.available_actions_ids(), q, env.cases)
-                    env.act_with_action_id(chosen_action)
             elif event.type == pygame.KEYDOWN and not env.game_over:
                 if event.key == pygame.K_LEFT:
                     action = 0
@@ -163,6 +161,11 @@ def pac_man_env(pi, q):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_r and env.game_over:  # restart game
                 env.reset()
 
+        if algo_playing and not env.game_over:
+            if env.move_time.can_execute():
+                chosen_action = get_best_pac_man_play(env.available_actions_ids(), q, env.state_description())
+                env.act_with_action_id(chosen_action)
+
         pygame.display.update()
 
 
@@ -170,7 +173,6 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
     def __init__(self):
         pygame.init()
         self.cases = initiate_map()
-        self.game_state = 0
         self.game_over = False
         self.current_score = 0.0
         self.round_counter = 0
@@ -188,24 +190,6 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
         self.take_energizer = False
         self.energizer_time = TimeCapsule(5.0)
         self.reset()
-
-    def state_id(self) -> int:
-        sum = 0
-        complete_cases = self.get_complete_cases()
-        for i in range(len(complete_cases)):
-            for j in range(len(complete_cases[i])):
-                case = complete_cases[i][j]
-                if case == 0:  # empty space
-                    sum += i
-                elif case == 1:  # dot
-                    sum += pow(2, i)
-                elif case == 2:  # mega dot
-                    sum += pow(2, 10 + i)
-                elif case == 3:  # player position ?
-                    sum += pow(2, 10 * 2 + i)
-                elif case >= 4:  # enemy position ?
-                    sum += pow(2, 10 * 4 + i)
-        return sum
 
     def state_description(self) -> np.ndarray:
         complete_cases = self.get_complete_cases()
@@ -246,6 +230,7 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
         elif action_id == 3:
             y += 1
 
+        self.move_ghosts()
         if 0 <= x < 26 and 0 <= y < 29:
             if self.cases[y][x] != -1:
                 self.pacman_position['x'] = x
@@ -263,12 +248,9 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
         if self.check_game_ended():
             self.current_score += 10000
             self.game_over = True
-        else:
-            self.move_ghosts()
 
-        self.current_score -= 1
+        #self.current_score -= 5
         self.round_counter += 1
-        self.game_state = self.state_id()
 
     def check_game_ended(self):
         dot_counter = 0
@@ -317,7 +299,7 @@ class PacMan(DeepSingleAgentWithDiscreteActionsEnv):
                         self.current_score += 10000
                         self.ghosts[i] = {'x': 13, 'y': 4, 'dead': True, 'time_to_respawn': TimeCapsule(3)}
                     else:
-                        self.current_score -= 100000
+                        self.current_score -= 0 # 100000
                         self.game_over = True
                         return
                 elif self.cases[new_y][new_x] != -1:

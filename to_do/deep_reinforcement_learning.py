@@ -11,10 +11,10 @@ import numpy as np
 
 
 def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
-    epsilon = 0.1
+    epsilon = 0.25
     gamma = 0.9
-    max_episodes_count = 100 if not isinstance(env, PacMan) else 10
-    pre_warm = (max_episodes_count / 10) if not isinstance(env, PacMan) else 3
+    max_episodes_count = 100 if not isinstance(env, PacMan) else 25
+    pre_warm = (max_episodes_count / 10) if not isinstance(env, PacMan) else 7
 
     state_description_length = env.state_description_length()
     max_actions_count = env.max_actions_count()
@@ -84,7 +84,7 @@ def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
 
 def demo():
     env = PacMan()
-    episodic_semi_gradient_sarsa_jit = jit()(episodic_semi_gradient_sarsa)
-    q = episodic_semi_gradient_sarsa_jit(env)
+    #episodic_semi_gradient_sarsa_jit = jit(episodic_semi_gradient_sarsa)
+    q = episodic_semi_gradient_sarsa(env)
     print(q)
     pac_man_env(1, q)
