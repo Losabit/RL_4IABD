@@ -298,6 +298,7 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 
 def demo():
+<<<<<<< HEAD
     trained = monte_carlo_es_on_tic_tac_toe_solo()
     # print(trained.pi)
     tic_tac_toe_env(trained.pi, trained.q)
@@ -308,6 +309,47 @@ def demo():
     # tic_tac_toe_env(trained.pi, trained.q)
     # print(on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo())
     # print(off_policy_monte_carlo_control_on_tic_tac_toe_solo())
+=======
+    choice = 0
+    print("Choisissez un mode de jeu pour TicTacToe :")
+    print("1. Joueur vs Random")
+    print("2. Random vs Monte Carlo")
+    #print("3. Joueur vs Monte Carlo")
+    while choice != 1 and choice != 2 and choice != 3:
+        choice = int(input())
+
+    number_of_games = "s"
+    if choice == 2:
+        print("Entrez un nombre de games à réaliser (possibilité d'appuyer sur R pour recommencer): ")
+        while not number_of_games.isdigit():
+            number_of_games = input()
+        number_of_games = int(number_of_games)
+    else:
+        number_of_games = 1
+
+    if choice == 1:
+        tic_tac_toe_env(None, None)
+    else:
+        algo_choice = 0
+        print("Choisissez un algorithme de MonteCarlo : ")
+        print("1. Explorating Start")
+        print("2. Off Policy")
+        print("3. On Policy")
+        while algo_choice != 1 and algo_choice != 2 and algo_choice != 3:
+            algo_choice = int(input())
+
+        if algo_choice == 1:
+            trained = monte_carlo_es_on_tic_tac_toe_solo()
+            tic_tac_toe_env(trained.pi, trained.q, number_of_games)
+        elif algo_choice == 2:
+            trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
+            tic_tac_toe_env(trained.pi, trained.q, number_of_games)
+        elif algo_choice == 3:
+            trained = on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo()
+            tic_tac_toe_env(trained.pi, trained.q, number_of_games)
+
+
+>>>>>>> ef473db7977e1ef6f92f9bcb14af7ff3a069c7ad
 
     # print(monte_carlo_es_on_secret_env2())
     # print(on_policy_first_visit_monte_carlo_control_on_secret_env2())

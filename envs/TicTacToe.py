@@ -19,7 +19,7 @@ def get_best_tic_tac_toe_play(available_actions, q, S, round_counter):
             return best_action
 
 
-def tic_tac_toe_env(pi, q):
+def tic_tac_toe_env(pi, q, iterations=1):
     env = TicTacToe()
     X = 600
     Y = 600
@@ -31,7 +31,7 @@ def tic_tac_toe_env(pi, q):
     x = pygame.image.load('assets/tictactoe/x.png')
     o = pygame.image.load('assets/tictactoe/o.png')
     game_finished = False
-
+    monte_carlo_playing = False
     game_won = 0
     game_counter = 0
 
@@ -59,7 +59,7 @@ def tic_tac_toe_env(pi, q):
             if won:
                 game_won += 1
             win_rate = int((game_won / game_counter) * 100)
-            pygame.display.set_caption("Tic Tac Toe - [winrate {}%]".format(win_rate))
+            pygame.display.set_caption(str(game_counter) + " - Tic Tac Toe - [winrate {}%]".format(win_rate))
 
         if monte_carlo_playing and not game_finished:
             s = env.state_id()
@@ -89,6 +89,13 @@ def tic_tac_toe_env(pi, q):
                 if monte_carlo_playing:
                     S = []
                     round_counter = 0
+
+        if game_counter != 0 and game_counter % iterations != 0 and game_finished:
+            game_finished = False
+            env.reset()
+            if monte_carlo_playing:
+                S = []
+                round_counter = 0
 
         pygame.display.update()
 

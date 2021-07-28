@@ -322,6 +322,7 @@ def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
 
 
 def demo():
+<<<<<<< HEAD
     # trained = q_learning_on_tic_tac_toe_solo()
     # tic_tac_toe_env(trained.pi, trained.q)
 
@@ -330,6 +331,45 @@ def demo():
     #
     # trained = expected_sarsa_on_tic_tac_toe_solo()
     # tic_tac_toe_env(trained.pi, trained.q)
+=======
+    choice = 0
+    print("Choisissez un mode de jeu pour TicTacToe :")
+    print("1. Joueur vs Random")
+    print("2. Random vs Monte Carlo")
+    # print("3. Joueur vs Monte Carlo")
+    while choice != 1 and choice != 2 and choice != 3:
+        choice = int(input())
+
+    number_of_games = "s"
+    if choice == 2:
+        print("Entrez un nombre de games à réaliser (possibilité d'appuyer sur R pour recommencer): ")
+        while not number_of_games.isdigit():
+            number_of_games = input()
+        number_of_games = int(number_of_games)
+    else:
+        number_of_games = 1
+
+    if choice == 1:
+        tic_tac_toe_env(None, None)
+    else:
+        algo_choice = 0
+        print("Choisissez un algorithme de MonteCarlo : ")
+        print("1. Q Learning")
+        print("2. Sarsa")
+        print("3. Expected Sarsa")
+        while algo_choice != 1 and algo_choice != 2 and algo_choice != 3:
+            algo_choice = int(input())
+
+        if algo_choice == 1:
+            trained = q_learning_on_tic_tac_toe_solo()
+            tic_tac_toe_env(trained.pi, trained.q, number_of_games)
+        elif algo_choice == 2:
+            trained = sarsa_on_tic_tac_toe_solo()
+            tic_tac_toe_env(trained.pi, trained.q, number_of_games)
+        elif algo_choice == 3:
+            trained = expected_sarsa_on_tic_tac_toe_solo()
+            tic_tac_toe_env(trained.pi, trained.q, number_of_games)
+>>>>>>> ef473db7977e1ef6f92f9bcb14af7ff3a069c7ad
 
     #print(expected_sarsa_on_tic_tac_toe_solo())
     # print(sarsa_on_tic_tac_toe_solo())
