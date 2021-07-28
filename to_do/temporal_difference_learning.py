@@ -322,20 +322,22 @@ def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
 
 
 def demo():
-    #trained = q_learning_on_tic_tac_toe_solo()
-    #tic_tac_toe_env(trained.pi, trained.q)
+    # trained = q_learning_on_tic_tac_toe_solo()
+    # tic_tac_toe_env(trained.pi, trained.q)
 
-    #trained = sarsa_on_tic_tac_toe_solo()
-    #tic_tac_toe_env(trained.pi, trained.q)
-
-    trained = expected_sarsa_on_tic_tac_toe_solo()
-    tic_tac_toe_env(trained.pi, trained.q)
+    # trained = sarsa_on_tic_tac_toe_solo()
+    # tic_tac_toe_env(trained.pi, trained.q)
+    #
+    # trained = expected_sarsa_on_tic_tac_toe_solo()
+    # tic_tac_toe_env(trained.pi, trained.q)
 
     #print(expected_sarsa_on_tic_tac_toe_solo())
     # print(sarsa_on_tic_tac_toe_solo())
     # print(q_learning_on_tic_tac_toe_solo())
     # print(expected_sarsa_on_tic_tac_toe_solo())
 
-    # print(sarsa_on_secret_env3())
-    # print(q_learning_on_secret_env3())
-    # print(expected_sarsa_on_secret_env3())
+    print(sarsa_on_secret_env3())
+    print("\n")
+    print(q_learning_on_secret_env3())
+    print("\n")
+    print(expected_sarsa_on_secret_env3())

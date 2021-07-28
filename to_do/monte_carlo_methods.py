@@ -212,7 +212,7 @@ def algo_off_policy_monte_carlo(env) -> PolicyAndActionValueFunction:
                 C[s_t][a_t] += W
                 Q[s_t][a_t] += (W / (C[s_t][a_t])) * (G - Q[s_t][a_t])
 
-                max = max_dict(q[s])
+                max = max_dict(Q[s])
                 pi[s][max[0]] = max[1]
                 # for a_key in pi[s_t].keys():
                 #    pi[s_t][a_key] = np.argmax(Q[s_t][a_key])
@@ -299,13 +299,13 @@ def off_policy_monte_carlo_control_on_secret_env2() -> PolicyAndActionValueFunct
 
 def demo():
     trained = monte_carlo_es_on_tic_tac_toe_solo()
-    print(trained.pi)
+    # print(trained.pi)
     tic_tac_toe_env(trained.pi, trained.q)
 
-    #trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
-    #tic_tac_toe_env(trained.pi, trained.q)
-    #trained = on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo()
-    #tic_tac_toe_env(trained.pi, trained.q)
+    # trained = off_policy_monte_carlo_control_on_tic_tac_toe_solo()
+    # tic_tac_toe_env(trained.pi, trained.q)
+    # trained = on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo()
+    # tic_tac_toe_env(trained.pi, trained.q)
     # print(on_policy_first_visit_monte_carlo_control_on_tic_tac_toe_solo())
     # print(off_policy_monte_carlo_control_on_tic_tac_toe_solo())
 
