@@ -126,8 +126,8 @@ def deep_q_learning(env: DeepSingleAgentWithDiscreteActionsEnv):
 def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
     epsilon = 0.25
     gamma = 0.9
-    max_episodes_count = 100 if not isinstance(env, PacMan) else 25
-    pre_warm = (max_episodes_count / 10) if not isinstance(env, PacMan) else 7
+    max_episodes_count = 100 if not isinstance(env, PacMan) else 5
+    pre_warm = (max_episodes_count / 10) if not isinstance(env, PacMan) else 2
 
     state_description_length = env.state_description_length()
     max_actions_count = env.max_actions_count()

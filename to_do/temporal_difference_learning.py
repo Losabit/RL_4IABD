@@ -321,9 +321,9 @@ def expected_sarsa_on_secret_env3() -> PolicyAndActionValueFunction:
 def demo():
     print(sarsa_on_secret_env3())
     print("\n")
-    print(q_learning_on_secret_env3())
+    #print(q_learning_on_secret_env3())
     print("\n")
-    print(expected_sarsa_on_secret_env3())
+    #print(expected_sarsa_on_secret_env3())
 
     choice = 0
     print("Choisissez un mode de jeu pour TicTacToe :")
