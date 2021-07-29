@@ -104,15 +104,17 @@ def deep_q_learning(env: DeepSingleAgentWithDiscreteActionsEnv):
                     next_q_values = []
                     for x in range(len(states)):
                         all_q_inputs = get_q_inputs(available_actions[x], states[x], state_description_length,
-                                                       max_actions_count)
-                        targets.append(target_model.predict(all_q_inputs))
+                                                    max_actions_count)
+                        targets.append(target_model.predict(all_q_inputs).max(axis=1))
 
-                        next_all_q_inputs = get_q_inputs(next_available_actions[x], next_states[x], state_description_length,
-                                                        max_actions_count)
+                        next_all_q_inputs = get_q_inputs(next_available_actions[x], next_states[x],
+                                                         state_description_length,
+                                                         max_actions_count)
                         if len(next_all_q_inputs) == 0:
-                            next_q_values.append([0])
+                            next_q_values.append(np.array([0.0]))
                         else:
-                            next_q_values.append(target_model.predict(next_all_q_inputs).max(axis=1))
+                            test = target_model.predict(next_all_q_inputs).max(axis=1)
+                            next_q_values.append(test)
 
                     targets[range(batch_size), actions] = rewards + (1 - done) * next_q_values * gamma
                     model.fit(states, targets, epochs=1, verbose=0)
@@ -126,8 +128,8 @@ def deep_q_learning(env: DeepSingleAgentWithDiscreteActionsEnv):
 def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
     epsilon = 0.25
     gamma = 0.9
-    max_episodes_count = 100 if not isinstance(env, PacMan) else 25
-    pre_warm = (max_episodes_count / 10) if not isinstance(env, PacMan) else 7
+    max_episodes_count = 100 if not isinstance(env, PacMan) else 2
+    pre_warm = (max_episodes_count / 10) if not isinstance(env, PacMan) else 1
 
     state_description_length = env.state_description_length()
     max_actions_count = env.max_actions_count()
@@ -152,7 +154,7 @@ def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
             if (episode_id < pre_warm) or np.random.uniform(0.0, 1.0) < epsilon:
                 chosen_action = np.random.choice(available_actions)
             else:
-                all_q_inputs = concat_q_inputs([available_actions], [s], state_description_length, max_actions_count)
+                all_q_inputs = get_q_inputs(available_actions, s, state_description_length, max_actions_count)
                 all_q_values = np.squeeze(q.predict(all_q_inputs))
                 chosen_action = available_actions[np.argmax(all_q_values)]
 
@@ -194,14 +196,13 @@ def episodic_semi_gradient_sarsa(env: DeepSingleAgentWithDiscreteActionsEnv):
 
 def demo():
     env = PacMan()
-    #episodic_semi_gradient_sarsa_jit = jit(episodic_semi_gradient_sarsa)
+    # episodic_semi_gradient_sarsa_jit = jit(episodic_semi_gradient_sarsa)
     q = episodic_semi_gradient_sarsa(env)
 
-
-    env = TicTacToe()
+    #env = TicTacToe()
     # episodic_semi_gradient_sarsa_jit = jit()(episodic_semi_gradient_sarsa)
     # q = episodic_semi_gradient_sarsa_jit(env)
-    q = deep_q_learning(env)
+    #q = deep_q_learning(env)
     print(q)
-    # pac_man_env(1, q)
-    tic_tac_toe_env(1, q)
+    pac_man_env(1, q)
+    #tic_tac_toe_env(1, q)
