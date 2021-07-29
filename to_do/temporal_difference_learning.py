@@ -328,7 +328,7 @@ def demo():
     choice = 0
     print("Choisissez un mode de jeu pour TicTacToe :")
     print("1. Joueur vs Random")
-    print("2. Random vs Monte Carlo")
+    print("2. Random vs Temporal difference learning algo")
     # print("3. Joueur vs Monte Carlo")
     while choice != 1 and choice != 2 and choice != 3:
         choice = int(input())
